@@ -32,6 +32,7 @@ public class MessageControllerTest {
 
 	@Test
 	  public void shouldShowRecentMessages() throws Exception {
+		
 	    List<Message> expectedMessages = createMessageList(20);
 	    MessageRepository mockRepository = mock(MessageRepository.class);
 	    when(mockRepository.findMessages(Long.MAX_VALUE, 20))

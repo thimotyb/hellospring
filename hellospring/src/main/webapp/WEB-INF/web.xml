@@ -11,9 +11,42 @@
   	<servlet-class>it.ariadne.view.HelloServlet</servlet-class>
   </servlet>
   
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>HelloServlet2</display-name>
+  	<servlet-name>HelloServlet2</servlet-name>
+  	<servlet-class>it.ariadne.view.HelloServlet2</servlet-class>
+  </servlet>
+  
   <servlet-mapping>
   	<servlet-name>HelloServlet</servlet-name>
   	<url-pattern>/HelloServlet</url-pattern>
   </servlet-mapping>
+  
+  <servlet-mapping>
+  	<servlet-name>HelloServlet2</servlet-name>
+  	<url-pattern>/HelloServlet2</url-pattern>
+  </servlet-mapping>
+  
+  <security-constraint>
+		<web-resource-collection>
+			<web-resource-name>secured</web-resource-name>
+			<url-pattern>/protected/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>user</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<security-role>
+		<role-name>user</role-name>
+	</security-role>
+	<login-config>
+		<auth-method>FORM</auth-method>
+		<form-login-config>
+			<form-login-page>/login.jsp</form-login-page>
+			<form-error-page>/login_failure.jsp</form-error-page>
+		</form-login-config>
+	</login-config>
   
 </web-app>

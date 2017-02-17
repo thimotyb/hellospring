@@ -13,4 +13,8 @@ public class HelloWebServlet extends HttpServlet {
             throws IOException {
         response.getWriter().println("Hello this is a WebServlet");
     }
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        doGet(request, response);
+    }
 }
