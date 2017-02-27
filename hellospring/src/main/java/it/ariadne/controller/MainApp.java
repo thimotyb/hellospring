@@ -1,7 +1,15 @@
 package it.ariadne.controller;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
 
 import it.ariadne.config.ApplicationContextConfig;
 import it.ariadne.model.Language;
@@ -23,10 +31,9 @@ public class MainApp {
        System.out.println("----------");
       
        GreetingService service = (GreetingService) context.getBean("greetingService");
-  
- 
        service.sayGreeting();
-
+       
 	}
+	
 
 }

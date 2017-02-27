@@ -1,19 +1,38 @@
 package it.ariadne.config;
 
+import java.util.Properties;
+
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import it.ariadne.dao.MessageCollectionRepository;
+import it.ariadne.dao.MessageJDBCRepository;
 import it.ariadne.dao.MessageRepository;
 import it.ariadne.model.English;
 import it.ariadne.model.Language;
 
 @Configuration
 @ComponentScan("it.ariadne.*") 
+@EnableJpaRepositories(basePackages = { "it.ariadne.dao" })
+@EnableTransactionManagement
 public class ApplicationContextConfig { 
-  
+  	
+    @Configuration
+    @PropertySource("classpath:application.properties")
+    static class ApplicationProperties {}
+	
 	@Bean(name ="language")
     public Language getLanguage() { 
         return new English();
@@ -27,9 +46,69 @@ public class ApplicationContextConfig {
         return viewResolver;
     }
   
+    @Bean(name = "ariadneDataSource")
+	public DataSource dataSource() {
+        final JndiDataSourceLookup dsLookup = new JndiDataSourceLookup();
+        DataSource dataSource = dsLookup.getDataSource("jdbc/ariadne");
+        return dataSource;
+    } 
+    
     @Bean(name ="messageRepository")
     public MessageRepository getMessageRepository() { 
-        return new MessageCollectionRepository();
+        //return new MessageCollectionRepository();    	
+    	return new MessageJDBCRepository();
     }
+    
+    @Bean
+    LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource, 
+                                                                Environment env) {
+        LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
+        entityManagerFactoryBean.setDataSource(dataSource);
+        entityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+        entityManagerFactoryBean.setPackagesToScan("it.ariadne.model");
+ 
+        Properties jpaProperties = new Properties();
+     
+        //Configures the used database dialect. This allows Hibernate to create SQL
+        //that is optimized for the used database.
+        jpaProperties.put("hibernate.dialect", env.getRequiredProperty("hibernate.dialect")/*"org.hibernate.dialect.MySQL5Dialect"*/);
+ 
+        //Specifies the action that is invoked to the database when the Hibernate
+        //SessionFactory is created or closed.
+        jpaProperties.put("hibernate.hbm2ddl.auto", 
+                env.getRequiredProperty("hibernate.hbm2ddl.auto")/*"update"*/
+        );
+ 
+        //Configures the naming strategy that is used when Hibernate creates
+        //new database objects and schema elements
+        jpaProperties.put("hibernate.ejb.naming_strategy", 
+                env.getRequiredProperty("hibernate.ejb.naming_strategy")/*"org.hibernate.cfg.ImprovedNamingStrategy"*/
+        );
+ 
+        //If the value of this property is true, Hibernate writes all SQL
+        //statements to the console.
+        jpaProperties.put("hibernate.show_sql", 
+                env.getRequiredProperty("hibernate.show_sql")/*"true"*/
+        );
+ 
+        //If the value of this property is true, Hibernate will format the SQL
+        //that is written to the console.
+        jpaProperties.put("hibernate.format_sql", 
+                env.getRequiredProperty("hibernate.format_sql")/*"true"*/
+        );
+ 
+        entityManagerFactoryBean.setJpaProperties(jpaProperties);
+ 
+        return entityManagerFactoryBean;
+    }
+    
+    @Bean
+    JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+        JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setEntityManagerFactory(entityManagerFactory);
+        return transactionManager;
+    }
+    
+	
  
 }

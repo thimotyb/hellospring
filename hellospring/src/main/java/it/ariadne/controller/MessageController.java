@@ -25,4 +25,16 @@ public class MessageController {
 		return "messages";
 	}
 	
+	@RequestMapping(value = "template", method = RequestMethod.GET)
+	public String messagesTemplate(Model model) {
+		model.addAttribute(messageRepository.getMessageTitles());
+		return "messages";
+	}
+	
+	@RequestMapping(value = "jpa", method = RequestMethod.GET)
+	public String messagesJpa(Model model) {
+		model.addAttribute(messageRepository.getMessageTitles());
+		return "messages";
+	}
+	
 }

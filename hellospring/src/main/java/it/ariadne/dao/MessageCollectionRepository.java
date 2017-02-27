@@ -17,4 +17,10 @@ public class MessageCollectionRepository implements MessageRepository {
 		return messages;
 	}
 
+	@Override
+	public List<String> getMessageTitles() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
